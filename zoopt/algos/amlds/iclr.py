@@ -29,6 +29,7 @@ class AMLDS:
         # Dongzi:
         start_point = [-1]
         start_value = objective.eval(Solution(x=start_point))
+        optim_his = [start_value+[start_value]]
         sol = Solution(x=start_point, value=start_value)
         objective.set_last_x(sol)
         for t in range(iterations):
@@ -54,8 +55,11 @@ class AMLDS:
             proposed_fy = np.array(proposed_fy)
             min_idx = np.argmin(proposed_fy)
             if proposed_fy[min_idx]<old_value:
+                optim_his.append([proposed_x[min_idx], proposed_fy[min_idx]])
                 new_sol = Solution(x=[proposed_x[min_idx]], value=proposed_fy[min_idx])
                 objective.set_last_x(new_sol)
+            else:
+                optim_his.append([x, old_value])
 
             # min_idx = np.argmin(proposed_fy)
             # if min_idx != 0:
@@ -63,9 +67,7 @@ class AMLDS:
             #                    value=proposed_fy[min_idx - 1])
             # objective.set_last_x(sol)
         
-        last_sol = objective.get_last_x()
-        final_x, final_value = last_sol.get_x(), last_sol.get_value()
-        return final_x, final_value
+        return optim_his
 
     def temp_opt(self):
         """
