@@ -26,7 +26,10 @@ class AMLDS:
         r = parameter.get_max_search_radius()
         multiplier = np.log(R / r)
         # TODO change the initialization
-        sol = Solution(x=[-1])
+        # Dongzi:
+        start_point = [-1]
+        start_value = objective.eval(Solution(x=start_point))
+        sol = Solution(x=start_point, value=start_value)
         objective.set_last_x(sol)
         for t in range(iterations):
             radius = R
@@ -34,16 +37,35 @@ class AMLDS:
             for k in range(multiplier + 1):
                 radius //= 2
                 steps[k] = radius * np.random.normal(size=dim.get_size())
-            x = objective.get_last_x().get_x()  # x_t
+            #x = objective.get_last_x().get_x()  # x_t
+            # Dongzi:
+            old_sol = objective.get_last_x()
+            x, old_value = old_sol.get_x(), old_sol.get_value() # x_t, fx(x_t)
+
             proposed_x = x + steps  # x_t + v_ik
-            proposed_fy = np.array([objective(x)] + [objective(proposed_x[i])
-                                                     for i in
-                                                     range(multiplier + 1)])
+            #proposed_fy = np.array([objective(x)] + [objective(proposed_x[i])
+            #                                         for i in
+            #                                         range(multiplier + 1)])
+            
+            # Dongzi:
+            proposed_fy = []
+            for nx in proposed_x:
+                proposed_fy.append(objective.eval(Solution([nx])))
+            proposed_fy = np.array(proposed_fy)
             min_idx = np.argmin(proposed_fy)
-            if min_idx != 0:
-                sol = Solution(x=[proposed_x[min_idx - 1]],
-                               value=proposed_fy[min_idx - 1])
-            objective.set_last_x(sol)
+            if proposed_fy[min_idx]<old_value:
+                new_sol = Solution(x=[proposed_x[min_idx]], value=proposed_fy[min_idx])
+                objective.set_last_x(new_sol)
+
+            # min_idx = np.argmin(proposed_fy)
+            # if min_idx != 0:
+            #     sol = Solution(x=[proposed_x[min_idx - 1]],
+            #                    value=proposed_fy[min_idx - 1])
+            # objective.set_last_x(sol)
+        
+        last_sol = objective.get_last_x()
+        final_x, final_value = last_sol.get_x(), last_sol.get_value()
+        return final_x, final_value
 
     def temp_opt(self):
         """
