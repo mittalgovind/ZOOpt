@@ -26,20 +26,24 @@ class AMLDS:
         r = parameter.get_max_search_radius()
         multiplier = np.log(R / r)
         # TODO change the initialization
-        objective.set_last_x(Solution(x=[-1]))
+        sol = Solution(x=[-1])
+        objective.set_last_x(sol)
         for t in range(iterations):
             radius = R
             steps = np.zeros(shape=(multiplier, dim.get_size()))
             for k in range(multiplier + 1):
                 radius //= 2
                 steps[k] = radius * np.random.normal(size=dim.get_size())
-            x = objective.get_last_x().get_x()
-            proposed_x = x + steps
-            proposed_fy = np.array([objective()])
-            np.argmin(proposed_x)
-
-
-
+            x = objective.get_last_x().get_x()  # x_t
+            proposed_x = x + steps  # x_t + v_ik
+            proposed_fy = np.array([objective(x)] + [objective(proposed_x[i])
+                                                     for i in
+                                                     range(multiplier + 1)])
+            min_idx = np.argmin(proposed_fy)
+            if min_idx != 0:
+                sol = Solution(x=[proposed_x[min_idx - 1]],
+                               value=proposed_fy[min_idx - 1])
+            objective.set_last_x(sol)
 
     def temp_opt(self):
         """
