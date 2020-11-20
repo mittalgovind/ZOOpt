@@ -43,7 +43,7 @@ class Parameter:
                  non_update_allowed=500, resample_times=100, balance_rate=0.5, high_dim_handling=False, reducedim=False,
                  num_sre=5, low_dimension=None, withdraw_alpha=Dimension(1, [[-1, 1]], [True]), variance_A=None,
                  stopping_criterion=DefaultStoppingCriterion(), seed=None, parallel=False, server_num=1,
-                 min_search_radius=1, max_search_radius=100):
+                 min_search_radius=1, max_search_radius=100, condition_number=25):
         """
         Initialization.
 
@@ -146,7 +146,7 @@ class Parameter:
         # for ICLR
         self.__min_search_radius = min_search_radius
         self.__max_search_radius = max_search_radius
-
+        self.__condition_number = condition_number
         return
 
     def auto_set(self, budget):
@@ -353,3 +353,6 @@ class Parameter:
 
     def get_max_search_radius(self):
         return self.__max_search_radius
+
+    def get_condition_number(self):
+        return self.__condition_number

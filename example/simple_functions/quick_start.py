@@ -6,14 +6,42 @@ Author:
 """
 
 from zoopt import Dimension, Objective, Parameter, ExpOpt, Opt, Solution
-from simple_function import ackley
+from simple_function import ackley, sphere
+
+
+def degree_4_poly(solution):
+    x = solution.get_x()
+    return x ** 6
+
+
+# TODO (Dongzi)
+def test_function_from_nesterov(solution):
+    x = solution.get_x()
+    # from nesterov's paper
+    return x
+
+
+# TODO (Dongzi)
+def test_func_2(solution):
+    return
+
+
+# TODO (Dongzi)
+def test_func_3(solution):
+    return
+
 
 if __name__ == '__main__':
     dim = 100  # dimension
-    objective = Objective(ackley, Dimension(dim, [[-1, 1]] * dim,
+    objective = Objective(sphere, Dimension(dim, [[-1, 1]] * dim,
                                             [True] * dim))  # setup objective
-    parameter = Parameter(budget=100 * dim, intermediate_result=True,
-                          intermediate_freq=1000, algorithm='AmLdS')
+
+    condition_num = 4
+    parameter = Parameter(budget=1000 * dim, intermediate_result=True,
+                          intermediate_freq=1000, algorithm='AmLdS',
+                          max_search_radius=100, min_search_radius=1,
+                          condition_number=condition_num
+                          )
     # parameter = Parameter(budget=100 * dim, init_samples=[Solution([0] * 100)])  # init with init_samples
     solution = Opt.min(objective, parameter)
     solution.print_solution()
