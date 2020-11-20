@@ -10,7 +10,7 @@ from zoopt.algos.high_dimensionality_handling.sre_optimization import Sequential
 from zoopt.algos.opt_algorithms.racos.racos_optimization import RacosOptimization
 from zoopt.utils.tool_function import ToolFunction
 from zoopt.utils.zoo_global import gl
-
+from zoopt.algos.amlds.iclr import AMLDS
 
 class Opt:
     """
@@ -39,6 +39,8 @@ class Opt:
             optimizer = ParetoOptimization()
         elif constraint is None and ((algorithm is None) or (algorithm == "racos") or (algorithm == "sracos")) or (algorithm == "ssracos"):
             optimizer = RacosOptimization()
+        elif constraint is None and algorithm == "amlds":
+            optimizer = AMLDS()
         else:
             ToolFunction.log(
                 "opt.py: No proper algorithm found for %s" % algorithm)

@@ -43,8 +43,7 @@ class Parameter:
                  non_update_allowed=500, resample_times=100, balance_rate=0.5, high_dim_handling=False, reducedim=False,
                  num_sre=5, low_dimension=None, withdraw_alpha=Dimension(1, [[-1, 1]], [True]), variance_A=None,
                  stopping_criterion=DefaultStoppingCriterion(), seed=None, parallel=False, server_num=1,
-                 min_search_radius, max_search_radius
-                 ):
+                 min_search_radius=1, max_search_radius=100):
         """
         Initialization.
 

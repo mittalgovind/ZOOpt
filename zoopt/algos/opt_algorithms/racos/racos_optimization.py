@@ -56,10 +56,13 @@ class RacosOptimization:
                     self.__algorithm = SRacos()
                 self.__best_solution = self.__algorithm.opt(
                         objective, parameter, strategy, ub)
+            # elif parameter.get_algorithm() == 'amlds':
+
             else:
                 self.__algorithm = Racos()
                 self.__best_solution = self.__algorithm.opt(
                     objective, parameter, ub)
+
         return self.__best_solution
 
     @staticmethod

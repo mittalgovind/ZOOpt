@@ -6,35 +6,38 @@ import math
 from zoopt.utils.tool_function import ToolFunction
 
 
-class SequentialRandomEmbedding:
+class AMLDS:
     """
     Sequential random embedding is implemented in this class.
     """
 
-    def __init__(self, objective, parameter, optimizer):
+    def __init__(self):
         """
-        :param objective: an Objective object
-        :param parameter: an Parameter object
-        :param optimizer: the optimization algorithm
+        Initialization.
         """
-        self.__objective = objective
-        self.__parameter = parameter
-        self.__optimizer = optimizer
+        self.__best_solution = None
+        self.__algorithm = None
 
-    def opt(self):
+    def opt(self, objective, parameter):
         """"""
-        dim = self.__objective.get_dim()
-        iterations = self.__parameter.get_budget()
-        R = self.__parameter.get_max_search_radius()
-        r = self.__parameter.get_max_search_radius()
+        dim = objective.get_dim()
+        iterations = parameter.get_budget()
+        R = parameter.get_max_search_radius()
+        r = parameter.get_max_search_radius()
         multiplier = np.log(R / r)
-
+        # TODO change the initialization
+        objective.set_last_x(Solution(x=[-1]))
         for t in range(iterations):
             radius = R
             steps = np.zeros(shape=(multiplier, dim.get_size()))
             for k in range(multiplier + 1):
                 radius //= 2
                 steps[k] = radius * np.random.normal(size=dim.get_size())
+            x = objective.get_last_x().get_x()
+            proposed_x = x + steps
+            proposed_fy = np.array([objective()])
+            np.argmin(proposed_x)
+
 
 
 
