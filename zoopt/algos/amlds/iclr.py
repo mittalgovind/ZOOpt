@@ -38,6 +38,8 @@ class AMLDS:
 
         optim_history = [(start_point, start_value)]
 
+        print(start_point, start_value)
+
         # Start optimization loop
         for t in tqdm(range(iterations)):
             radius = max_search_radius
@@ -66,7 +68,8 @@ class AMLDS:
 
             optim_history.append((updated_x, updated_value))
 
-        return optim_history
+        #return optim_history
+        return Solution(x=updated_x, value=updated_value)
 
     # TODO (Govind)
     def plotting_loss(self):
