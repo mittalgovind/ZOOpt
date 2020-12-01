@@ -7,6 +7,8 @@ Author:
 
 from zoopt import Dimension, Objective, Parameter, ExpOpt, Opt, Solution
 from example.simple_functions.simple_function import ackley, sphere
+import numpy as np
+import pandas as pd
 
 
 def degree_4_poly(solution):
@@ -21,17 +23,17 @@ def degree_4_poly(solution):
 def test_function_from_nesterov(solution):
     x = solution.get_x()
     # from nesterov's paper
-    value = (x[0]**2 + x[-1]**2)/2 - x[0]
-    for i in range(len(x)-1):
-        value += ((x[i+1] - x[i])**2)/2
+    value = (x[0] ** 2 + x[-1] ** 2) / 2 - x[0]
+    for i in range(len(x) - 1):
+        value += ((x[i + 1] - x[i]) ** 2) / 2
     return value
 
-import numpy as np
-import pandas as pd
+
 df = pd.read_csv('dataset/auto-mpg.csv')
-df = df[df['horsepower']!='?']
+df = df[df['horsepower'] != '?']
 # X_mpg = df[['cylinders', 'displacement', 'horsepower', 'weight', 'acceleration', 'model year', 'origin']].values
-X_mpg = df[['cylinders', 'displacement', 'horsepower', 'weight', 'acceleration']].values
+X_mpg = df[['cylinders', 'displacement', 'horsepower', 'weight',
+            'acceleration']].values
 y_mpg = df['mpg'].to_numpy()
 X_mpg = np.array(X_mpg, dtype='float')
 extra = np.ones(X_mpg.shape[0])
@@ -42,13 +44,17 @@ mpg_samples = X_mpg.shape[0]
 lambda_cond = 100
 print("Lambda for l2 regularization term is: ", lambda_cond)
 U_mpg, S_mpg, VT_mpg = np.linalg.svd(X_mpg)
-print("The condition number for mpg is %f." % ((S_mpg[0]+lambda_cond)/(S_mpg[-1]+lambda_cond)))
+print("The condition number for mpg is %f." % (
+        (S_mpg[0] + lambda_cond) / (S_mpg[-1] + lambda_cond)))
+
 
 # TODO (Dongzi)
 def test_func_2(solution):
     # dim = 6 or 8 depends on whether to use the last two features
     x = solution.get_x()
-    return np.sum((np.dot(X_mpg, x)-y_mpg)**2)/mpg_samples + lambda_cond*np.sum(x**2)
+    return np.sum(
+        (np.dot(X_mpg, x) - y_mpg) ** 2) / mpg_samples + lambda_cond * np.sum(
+        x ** 2)
 
 
 slump_df = pd.read_csv('dataset/slump_test.data')
@@ -61,19 +67,23 @@ X_slump = np.hstack((extra_slump, X_slump))
 slump_samples = X_slump.shape[0]
 
 U_slump, S_slump, VT_slump = np.linalg.svd(X_slump)
-print("The condition number for slump is %f." % ((S_slump[0]+lambda_cond)/(S_slump[-1]+lambda_cond)))
+print("The condition number for slump is %f." % (
+        (S_slump[0] + lambda_cond) / (S_slump[-1] + lambda_cond)))
+
 
 # TODO (Dongzi)
 def test_func_3(solution):
     # dim = 10
     x = solution.get_x()
-    return np.sum((np.dot(X_slump, x)-y_slump)**2)/slump_samples + lambda_cond*np.sum(x**2)
+    return np.sum((np.dot(X_slump, x) - y_slump) ** 2) / slump_samples \
+            + lambda_cond * np.sum(x ** 2)
 
 
 if __name__ == '__main__':
     dim = 10  # dimension
-    objective = Objective(test_func_3, Dimension(dim, [[-1, 1]] * dim,
-                                            [True] * dim))  # setup objective
+    objective = Objective(test_function_from_nesterov, Dimension(dim, [[-1, 1]] * dim,
+                                                 [
+                                                     True] * dim))  # setup objective
 
     condition_num = 4
     parameter = Parameter(budget=10000 * dim, intermediate_result=True,

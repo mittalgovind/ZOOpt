@@ -5,6 +5,9 @@ import copy
 import math
 from zoopt.utils.tool_function import ToolFunction
 from tqdm import tqdm
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 class AMLDS:
     """
@@ -31,17 +34,17 @@ class AMLDS:
 
         # Initialization
         # TODO (Govind) change the initialization
-        start_point = -1 * np.ones(dim.get_size())
+        start_point = -1 * np.zeros(dim.get_size())
         start_value = objective.eval(Solution(x=start_point))
         sol = Solution(x=start_point, value=start_value)
         objective.set_last_x(sol)
 
-        optim_history = [(start_point, start_value)]
+        optim_history = [[start_point, start_value]]
 
         print(start_point, start_value)
 
         # Start optimization loop
-        for t in tqdm(range(iterations)):
+        for _ in tqdm(range(iterations - 1)):
             radius = max_search_radius
             steps = np.zeros(shape=(multiplier + 1, dim.get_size()))
             # collect ball sampling trials
@@ -66,10 +69,22 @@ class AMLDS:
                                    value=proposed_fy[min_idx])
                 objective.set_last_x(new_sol)
 
-            optim_history.append((updated_x, updated_value))
+            optim_history.append([updated_x, updated_value])
 
-        #return optim_history
+        self.plot_history(optim_history)
+
         return Solution(x=updated_x, value=updated_value)
+
+    @staticmethod
+    def plot_history(history, density=50, burn=1000):
+        history = np.array(history)
+        loss_hist = history[:, 1][burn :].reshape((-1, density))[:, 0]
+        plt.clf()
+        plt.scatter(y=loss_hist, x=np.arange(len(loss_hist)))
+        plt.ylabel('Loss')
+        plt.xlabel('Number of epochs')
+        plt.show()
+
 
     # TODO (Govind)
     def plotting_loss(self):
