@@ -20,7 +20,7 @@ def degree_4_poly(solution):
 # This function requires starting point is zero vector.
 # The dim for this function should be 10/15.
 # Larger dim makes optimization harder!
-def test_function_from_nesterov(solution):
+def nesterov_func(solution):
     x = solution.get_x()
     # from nesterov's paper
     value = (x[0] ** 2 + x[-1] ** 2) / 2 - x[0]
@@ -49,7 +49,7 @@ print("The condition number for mpg is %f." % (
 
 
 # TODO (Dongzi)
-def test_func_2(solution):
+def regression_mpg_func(solution):
     # dim = 6 or 8 depends on whether to use the last two features
     x = solution.get_x()
     return np.sum(
@@ -72,28 +72,32 @@ print("The condition number for slump is %f." % (
 
 
 # TODO (Dongzi)
-def test_func_3(solution):
+def regression_slump_func(solution):
     # dim = 10
     x = solution.get_x()
-    return np.sum((np.dot(X_slump, x) - y_slump) ** 2) / slump_samples \
-            + lambda_cond * np.sum(x ** 2)
+    x = np.array(x)
+    return np.sum((np.dot(X_slump, x) - y_slump) ** 2) / slump_samples + lambda_cond * np.sum(x ** 2)
 
 
 if __name__ == '__main__':
     dim = 10  # dimension
-    objective = Objective(test_function_from_nesterov, Dimension(dim, [[-1, 1]] * dim,
-                                                 [
-                                                     True] * dim))  # setup objective
+    objective = Objective(regression_slump_func, Dimension(dim, [[-1, 1]] * dim,
+                                                   [True] * dim))  # setup objective
 
     condition_num = 4
-    parameter = Parameter(budget=10000 * dim, intermediate_result=True,
-                          intermediate_freq=1000, algorithm='AmLdS',
+    parameter = Parameter(budget=100000 * dim, intermediate_result=True,
+                          intermediate_freq=1000, algorithm="amlds",
                           max_search_radius=100, min_search_radius=1,
                           condition_number=condition_num
                           )
     # parameter = Parameter(budget=100 * dim, init_samples=[Solution([0] * 100)])  # init with init_samples
     solution = Opt.min(objective, parameter)
     solution.print_solution()
+    import matplotlib.pyplot as plt
+
+    plt.plot(objective.get_history_bestsofar())
+    plt.show()
+
     # solution_list = ExpOpt.min(objective, parameter, repeat=1, plot=True,
     #                            plot_file="img/quick_start.png")
     # for solution in solution_list:

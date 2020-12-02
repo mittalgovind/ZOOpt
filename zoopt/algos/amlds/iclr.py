@@ -34,7 +34,7 @@ class AMLDS:
 
         # Initialization
         # TODO (Govind) change the initialization
-        start_point = -1 * np.zeros(dim.get_size())
+        start_point = -1 * np.ones(dim.get_size())
         start_value = objective.eval(Solution(x=start_point))
         sol = Solution(x=start_point, value=start_value)
         objective.set_last_x(sol)
@@ -68,17 +68,18 @@ class AMLDS:
                 new_sol = Solution(x=proposed_x[min_idx],
                                    value=proposed_fy[min_idx])
                 objective.set_last_x(new_sol)
-
+            if np.equal(updated_x, x).sum() == 0:
+                updated_x += 10 * (updated_x - x) # eta * (x_t - x_t-1)
             optim_history.append([updated_x, updated_value])
 
-        self.plot_history(optim_history)
+        # self.plot_history(optim_history)
 
         return Solution(x=updated_x, value=updated_value)
 
     @staticmethod
     def plot_history(history, density=50, burn=1000):
         history = np.array(history)
-        loss_hist = history[:, 1][burn :].reshape((-1, density))[:, 0]
+        loss_hist = history[:, 1][burn:].reshape((-1, density))[:, 0]
         plt.clf()
         plt.scatter(y=loss_hist, x=np.arange(len(loss_hist)))
         plt.ylabel('Loss')
