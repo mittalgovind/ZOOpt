@@ -18,7 +18,7 @@ def degree_4_poly(solution):
 
 # TODO (Dongzi)
 # This function requires starting point is zero vector.
-# The dim for this function should be 10/15.
+# The dim for this function should be 8/10.
 # Larger dim makes optimization harder!
 def nesterov_func(solution):
     x = solution.get_x()
@@ -80,12 +80,12 @@ def regression_slump_func(solution):
 
 
 if __name__ == '__main__':
-    dim = 10  # dimension
-    objective = Objective(regression_slump_func, Dimension(dim, [[-1, 1]] * dim,
+    dim = 8  # dimension
+    objective = Objective(nesterov_func, Dimension(dim, [[-1, 1]] * dim,
                                                    [True] * dim))  # setup objective
 
     condition_num = 4
-    parameter = Parameter(budget=100000 * dim, intermediate_result=True,
+    parameter = Parameter(budget=10000 * dim, intermediate_result=True,
                           intermediate_freq=1000, algorithm="amlds",
                           max_search_radius=100, min_search_radius=1,
                           condition_number=condition_num
@@ -93,10 +93,10 @@ if __name__ == '__main__':
     # parameter = Parameter(budget=100 * dim, init_samples=[Solution([0] * 100)])  # init with init_samples
     solution = Opt.min(objective, parameter)
     solution.print_solution()
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
 
-    plt.plot(objective.get_history_bestsofar())
-    plt.show()
+    # plt.plot(objective.get_history_bestsofar())
+    # plt.show()
 
     # solution_list = ExpOpt.min(objective, parameter, repeat=1, plot=True,
     #                            plot_file="img/quick_start.png")
