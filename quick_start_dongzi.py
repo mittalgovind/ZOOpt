@@ -76,13 +76,16 @@ def regression_slump_func(solution):
     # dim = 10
     x = solution.get_x()
     x = np.array(x)
-    return np.sum((np.dot(X_slump, x) - y_slump) ** 2) / slump_samples + lambda_cond * np.sum(x ** 2)
+    return np.sum((np.dot(X_slump,
+                          x) - y_slump) ** 2) / slump_samples + lambda_cond * np.sum(
+        x ** 2)
 
 
 if __name__ == '__main__':
     dim = 10  # dimension
-    objective = Objective(regression_slump_func, Dimension(dim, [[-1, 1]] * dim,
-                                                   [True] * dim))  # setup objective
+    objective = Objective(regression_slump_func,
+                          Dimension(dim, [[-1, 1]] * dim,
+                                    [True] * dim))  # setup objective
 
     condition_num = 4
     parameter = Parameter(budget=100000 * dim, intermediate_result=True,
