@@ -68,11 +68,23 @@ class AMLDS:
                 new_sol = Solution(x=proposed_x[min_idx],
                                    value=proposed_fy[min_idx])
                 objective.set_last_x(new_sol)
-            if np.equal(updated_x, x).sum() == 0:
-                updated_x += 10 * (updated_x - x) # eta * (x_t - x_t-1)
+            # Momentum try 1:
+            # if np.equal(updated_x, x).sum() == 0:
+            #     updated_x += 10 * (updated_x - x) # eta * (x_t - x_t-1)
+            
+            # Updated momentum:
+            # 1. On MPG dataset, eta belongs to [0.05, 0.1] will generate a nice
+            # (even better) function value compared with the origin one.
+            # 2. On Slump dataset, eta belongs to [0.01, 0.02] will generate a nice
+            # (very close) function value compared with the origin one.
+            # 3. On nesterov_func, eta belongs to [0.008, 0.015] will generate a better
+            # function value in most test cases compared with the origin one.
+            if np.equal(updated_x, x).sum() != len(x):
+                updated_x += 0.015 * x # x_t = x_t + eta * x_{t-1}
+            
             optim_history.append([updated_x, updated_value])
 
-        # self.plot_history(optim_history)
+        self.plot_history(optim_history)
 
         return Solution(x=updated_x, value=updated_value)
 
