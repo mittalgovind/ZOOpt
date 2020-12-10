@@ -80,8 +80,8 @@ def regression_slump_func(solution):
 
 
 if __name__ == '__main__':
-    dim = 8  # dimension
-    objective = Objective(nesterov_func, Dimension(dim, [[-1, 1]] * dim,
+    dim = 10  # dimension
+    objective = Objective(regression_slump_func, Dimension(dim, [[-1, 1]] * dim,
                                                    [True] * dim))  # setup objective
 
     condition_num = 4

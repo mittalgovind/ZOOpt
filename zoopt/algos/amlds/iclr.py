@@ -41,6 +41,9 @@ class AMLDS:
 
         optim_history = [[start_point, start_value]]
 
+        # Used for the average momentum case:
+        unique_x = np.array([start_point])
+
         print(start_point, start_value)
         count = set()
         # all_xs = []
@@ -70,9 +73,9 @@ class AMLDS:
             # update the objective value and new solution for next iteration
             if proposed_fy[min_idx] < old_value:
                 updated_x, updated_value = proposed_x[min_idx], proposed_fy[min_idx]
-                new_sol = Solution(x=proposed_x[min_idx],
-                                   value=proposed_fy[min_idx])
-                objective.set_last_x(new_sol)
+                # new_sol = Solution(x=proposed_x[min_idx],
+                #                    value=proposed_fy[min_idx])
+                # objective.set_last_x(new_sol)
 
 
             # Momentum try 1:
@@ -86,13 +89,31 @@ class AMLDS:
             # (very close) function value compared with the origin one.
             # 3. On nesterov_func, eta belongs to [0.008, 0.015] will generate a better
             # function value in most test cases compared with the origin one.
+            # if np.equal(updated_x, x).sum() != len(x):
+            #     # x_t = x_t + eta * x_{t-1}
+            #     # updated_x += 0.02 * x # sequence of x_i , i < t
+            #     # updated_value = objective.eval(Solution(updated_x))
+            #     temp_x = updated_x + 0.02 * x
+            #     temp_value = objective.eval(Solution(temp_x))
+            #     if temp_value < updated_value:
+            #         updated_x, updated_value = temp_x, temp_value
+
+            # Third version momentum (average unique_x):
+            # Add the average of all* of the previous x's
             if np.equal(updated_x, x).sum() != len(x):
-                # x_t = x_t + eta * x_{t-1}
-                # proposition #2
-                # add the average of all* of the previous x's
-                updated_x += 0.015 * x # sequence of x_i , i < t
+                average_x = unique_x.sum(axis=0)/len(unique_x)
+                temp_x = updated_x + 0.01 * average_x
+                temp_value = objective.eval(Solution(temp_x))
+                if temp_value < updated_value:
+                    updated_x, updated_value = temp_x, temp_value
+
+            new_sol = Solution(x=updated_x, value=updated_value)
+            objective.set_last_x(new_sol)
 
             optim_history.append([updated_x, updated_value])
+
+            if np.equal(updated_x, unique_x[-1]).sum() != len(updated_x):
+                unique_x = np.vstack((unique_x, updated_x))
 
         self.plot_history(optim_history)
         # print ('total evals = {}'.format(len(count)))
