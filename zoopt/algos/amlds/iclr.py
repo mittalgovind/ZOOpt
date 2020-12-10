@@ -89,14 +89,14 @@ class AMLDS:
             # (very close) function value compared with the origin one.
             # 3. On nesterov_func, eta belongs to [0.008, 0.015] will generate a better
             # function value in most test cases compared with the origin one.
-            # if np.equal(updated_x, x).sum() != len(x):
-            #     # x_t = x_t + eta * x_{t-1}
-            #     # updated_x += 0.02 * x # sequence of x_i , i < t
-            #     # updated_value = objective.eval(Solution(updated_x))
-            #     temp_x = updated_x + 0.02 * x
-            #     temp_value = objective.eval(Solution(temp_x))
-            #     if temp_value < updated_value:
-            #         updated_x, updated_value = temp_x, temp_value
+            if np.equal(updated_x, x).sum() != len(x):
+                # x_t = x_t + eta * x_{t-1}
+                # updated_x += 0.02 * x # sequence of x_i , i < t
+                # updated_value = objective.eval(Solution(updated_x))
+                temp_x = updated_x + 0.02 * x
+                temp_value = objective.eval(Solution(temp_x))
+                if temp_value < updated_value:
+                    updated_x, updated_value = temp_x, temp_value
 
             # Third version momentum (average unique_x):
             # Add the average of all* of the previous x's
