@@ -24,6 +24,8 @@ class AMLDS:
     def opt(self, objective, parameter):
         """"""
         # getters
+        method = parameter.method
+        func_name = parameter.func_name
         dim = objective.get_dim()
         iterations = parameter.get_budget()
         condition_number = parameter.get_condition_number()
@@ -72,11 +74,11 @@ class AMLDS:
             updated_x, updated_value = x, old_value
             # update the objective value and new solution for next iteration
             if proposed_fy[min_idx] < old_value:
-                updated_x, updated_value = proposed_x[min_idx], proposed_fy[min_idx]
+                updated_x, updated_value = proposed_x[min_idx], proposed_fy[
+                    min_idx]
                 # new_sol = Solution(x=proposed_x[min_idx],
                 #                    value=proposed_fy[min_idx])
                 # objective.set_last_x(new_sol)
-
 
             # Momentum try 1:
             # if np.equal(updated_x, x).sum() == 0:
@@ -89,23 +91,24 @@ class AMLDS:
             # (very close) function value compared with the origin one.
             # 3. On nesterov_func, eta belongs to [0.008, 0.015] will generate a better
             # function value in most test cases compared with the origin one.
-            if np.equal(updated_x, x).sum() != len(x):
-                # x_t = x_t + eta * x_{t-1}
-                # updated_x += 0.02 * x # sequence of x_i , i < t
-                # updated_value = objective.eval(Solution(updated_x))
-                temp_x = updated_x + 0.02 * x
-                temp_value = objective.eval(Solution(temp_x))
-                if temp_value < updated_value:
-                    updated_x, updated_value = temp_x, temp_value
-
-            # Third version momentum (average unique_x):
-            # Add the average of all* of the previous x's
-            if np.equal(updated_x, x).sum() != len(x):
-                average_x = unique_x.sum(axis=0)/len(unique_x)
-                temp_x = updated_x + 0.01 * average_x
-                temp_value = objective.eval(Solution(temp_x))
-                if temp_value < updated_value:
-                    updated_x, updated_value = temp_x, temp_value
+            if method == 1:
+                if np.equal(updated_x, x).sum() != len(x):
+                    # x_t = x_t + eta * x_{t-1}
+                    # updated_x += 0.02 * x # sequence of x_i , i < t
+                    # updated_value = objective.eval(Solution(updated_x))
+                    temp_x = updated_x + 0.02 * x
+                    temp_value = objective.eval(Solution(temp_x))
+                    if temp_value < updated_value:
+                        updated_x, updated_value = temp_x, temp_value
+            elif method == 2:
+                # Third version momentum (average unique_x):
+                # Add the average of all* of the previous x's
+                if np.equal(updated_x, x).sum() != len(x):
+                    average_x = unique_x.sum(axis=0) / len(unique_x)
+                    temp_x = updated_x + 0.01 * average_x
+                    temp_value = objective.eval(Solution(temp_x))
+                    if temp_value < updated_value:
+                        updated_x, updated_value = temp_x, temp_value
 
             new_sol = Solution(x=updated_x, value=updated_value)
             objective.set_last_x(new_sol)
@@ -115,20 +118,23 @@ class AMLDS:
             if np.equal(updated_x, unique_x[-1]).sum() != len(updated_x):
                 unique_x = np.vstack((unique_x, updated_x))
 
-        self.plot_history(optim_history)
+        self.plot_history(history=optim_history, iterations=iterations,
+                          dataset=func_name, method=method)
         # print ('total evals = {}'.format(len(count)))
         return Solution(x=updated_x, value=updated_value)
 
     @staticmethod
-    def plot_history(history, density=50, burn=1000):
+    def plot_history(history, density=50, burn=1000, iterations=101,
+                     dataset=None, method=None):
         history = np.array(history)
         loss_hist = history[:, 1][burn:].reshape((-1, density))[:, 0]
-        plt.clf()
-        plt.scatter(y=loss_hist, x=np.arange(len(loss_hist)))
-        plt.ylabel('Loss')
-        plt.xlabel('Number of epochs')
-        plt.show()
-
+        np.save('results/{}_{}/loss_hist_{}'.format(dataset, method, iterations),
+            loss_hist)
+        # plt.clf()
+        # plt.scatter(y=loss_hist, x=np.arange(len(loss_hist)))
+        # plt.ylabel('Loss')
+        # plt.xlabel('Number of epochs')
+        # plt.savefig()
 
     # TODO (Govind)
     def plotting_loss(self):

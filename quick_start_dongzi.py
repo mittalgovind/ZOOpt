@@ -9,6 +9,8 @@ from zoopt import Dimension, Objective, Parameter, ExpOpt, Opt, Solution
 from example.simple_functions.simple_function import ackley, sphere
 import numpy as np
 import pandas as pd
+import os
+import progressbar as pbar
 
 
 def degree_4_poly(solution):
@@ -76,23 +78,45 @@ def regression_slump_func(solution):
     # dim = 10
     x = solution.get_x()
     x = np.array(x)
-    return np.sum((np.dot(X_slump, x) - y_slump) ** 2) / slump_samples + lambda_cond * np.sum(x ** 2)
+    return np.sum((np.dot(X_slump,
+                          x) - y_slump) ** 2) / slump_samples + lambda_cond * np.sum(
+        x ** 2)
 
 
 if __name__ == '__main__':
-    dim = 10  # dimension
-    objective = Objective(regression_slump_func, Dimension(dim, [[-1, 1]] * dim,
-                                                   [True] * dim))  # setup objective
+    names = ['nesterov', 'mpg', 'slump']
+    funcs = [nesterov_func, regression_mpg_func, regression_slump_func]
+    dimensions = [8, 6, 10]
+    results = np.zeros((len(names), 3, 10, 10))
+    for f, (name, func, dim) in enumerate(zip(names, funcs, dimensions)):
+        print('====== Name - {} ===== '.format(name))
+        for method in range(3):
+            filepath = os.path.realpath('results/{}_{}/'.format(name, method))
+            if not os.path.isdir(filepath):
+                os.mkdir(filepath)
+            print('====== Method - {} ===== '.format(method))
+            for t in range(0, 10):
+                print('===== Iteration = {}'.format(t))
+                for j in range(10):
+                    # setup objective
+                    objective = Objective(func, Dimension(dim, [[-1, 1]] * dim,
+                                                          [True] * dim))
 
-    condition_num = 4
-    parameter = Parameter(budget=10000 * dim, intermediate_result=True,
-                          intermediate_freq=1000, algorithm="amlds",
-                          max_search_radius=100, min_search_radius=1,
-                          condition_number=condition_num
-                          )
-    # parameter = Parameter(budget=100 * dim, init_samples=[Solution([0] * 100)])  # init with init_samples
-    solution = Opt.min(objective, parameter)
-    solution.print_solution()
+                    condition_num = 4
+                    parameter = Parameter(budget=(t+1) * 1000 * dim,
+                                          intermediate_result=True,
+                                          intermediate_freq=1000,
+                                          algorithm="amlds",
+                                          max_search_radius=100,
+                                          min_search_radius=1,
+                                          condition_number=condition_num,
+                                          func_name=name, method=method
+                                          )
+                    solution = Opt.min(objective, parameter)
+                    results[f][method][t][j] = solution.get_value()
+
+    np.save('results.npy', results)
+
     # import matplotlib.pyplot as plt
 
     # plt.plot(objective.get_history_bestsofar())
